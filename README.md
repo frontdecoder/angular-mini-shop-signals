@@ -1,0 +1,1 @@
+# angular-mini-shop-signals
