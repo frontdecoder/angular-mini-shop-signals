@@ -10,7 +10,10 @@ export class ProductService {
     private baseUrl = enviroment.apiBaseUrl;
     constructor(private http: HttpClient) { }
 
-    getProducts(limit:number) {
+    getProducts(limit: number) {
         return this.http.get<Root>(`${this.baseUrl}/products?limit=${limit}`)
+    }
+    searchProduct(q: string) {
+        return this.http.get<Root>(`${this.baseUrl}/products/search?q=${q}`)
     }
 }
