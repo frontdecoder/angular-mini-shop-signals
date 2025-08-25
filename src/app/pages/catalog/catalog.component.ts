@@ -15,10 +15,10 @@ import { FormsModule } from '@angular/forms';
 export class CatalogComponent implements OnInit, OnDestroy {
 
   products = signal<Product[]>([]);
-  detsroy$ = new Subject<void>();
+  destroy$ = new Subject<void>();
   isLoading = signal(false);
-  serachTerm = signal('');
-  serach$ = new Subject<string>()
+  searchTerm = signal('');
+  search$ = new Subject<string>()
   constructor(
     private productService: ProductService
   ) { }
@@ -26,22 +26,22 @@ export class CatalogComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.getProducts();
 
-    this.serach$.pipe(
+    this.search$.pipe(
       debounceTime(300),
       distinctUntilChanged(),
       tap(term => {
+        this.isLoading.set(true);
         if (term.length < 3) {
           this.getProducts();
           this.isLoading.set(false)
         }
       }),
       filter(term => term.length >= 3),
-      tap(() => this.isLoading.set(true)),
       switchMap(term =>
         this.productService.searchProduct(term).pipe(
           finalize(() => this.isLoading.set(false)))),
       map(res => res.products),
-      takeUntil(this.detsroy$)
+      takeUntil(this.destroy$)
     )
       .subscribe({
         next: (v) => {
@@ -56,7 +56,7 @@ export class CatalogComponent implements OnInit, OnDestroy {
     this.productService.getProducts(12)
       .pipe(
         finalize(() => this.isLoading.set(false)),
-        takeUntil(this.detsroy$),
+        takeUntil(this.destroy$),
         map(res => res.products)
       )
       .subscribe({
@@ -71,13 +71,13 @@ export class CatalogComponent implements OnInit, OnDestroy {
 
 
   onSearch(value: string) {
-    this.serach$.next(value);
+    this.search$.next(value);
   }
 
 
   ngOnDestroy(): void {
-    this.detsroy$.next();
-    this.detsroy$.complete();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
 }
